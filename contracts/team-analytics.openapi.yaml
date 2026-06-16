@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+  title: Smart Campus — Analytics API (Group A5)
+  version: 1.0.0
+  description: Contract API của nhóm Analytics cho Lab 03.
+servers:
+  - url: http://localhost:4010
+    description: Prism mock server
+tags:
+  - name: health
+  - name: alerts
+  - name: events
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      tags: [health]
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  service: { type: string }
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    service: lab02-contract-template
+
+  /events:
+    post:
+      operationId: createCampusEvent
+      tags: [events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventType, eventId, deviceId, metric, value]
+              properties:
+                eventType: { type: string }
+                eventId: { type: string }
+                deviceId: { type: string }
+                metric: { type: string }
+                value: { type: number }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eventId: { type: string }
+                  acceptedAt: { type: string }
+              examples:
+                created:
+                  value:
+                    eventId: 0196fb3d-4ad7-7d1e-9f49-5d5148d2babc
+                    acceptedAt: '2026-05-10T08:00:00Z'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '422':
+          description: Unprocessable Entity
+
+  /alerts/recent:
+    get:
+      operationId: getRecentAlerts
+      tags: [alerts]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+              examples:
+                ok:
+                  value:
+                    items:
+                      - id: alert-1
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

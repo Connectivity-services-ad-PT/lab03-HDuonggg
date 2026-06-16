@@ -1,0 +1,362 @@
+{
+  "info": {
+    "_postman_id": "a014dd65-17b1-4c6f-a568-175a5206f8e8",
+    "name": "FIT4110_lab03_analytics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55447586"
+  },
+  "item": [
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "GET /health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "pm.test(\"Service is running and returns ok\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.status).to.eql(\"ok\");\r",
+                  "    pm.expect(jsonData.service).to.eql(\"lab02-contract-template\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /events - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "pm.test(\"Response chứa eventId và acceptedAt\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"eventId\");\r",
+                  "    pm.expect(jsonData).to.have.property(\"acceptedAt\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"eventType\": \"SENSOR_READING\",\r\n  \"eventId\": \"0196fb3d-4ad7-7d1e-9f49-5d5148d2babc\",\r\n  \"deviceId\": \"SENSOR-001\",\r\n  \"metric\": \"temperature\",\r\n  \"value\": 38.5,\r\n  \"unit\": \"celsius\",\r\n  \"timestamp\": \"2026-05-10T08:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02_Auth",
+      "item": [
+        {
+          "name": "POST /events - No Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"eventType\": \"SENSOR_READING\",\r\n  \"eventId\": \"0196fb3d-4ad7-7d1e-9f49-5d5148d2babc\",\r\n  \"deviceId\": \"SENSOR-001\",\r\n  \"metric\": \"temperature\",\r\n  \"value\": 38.5,\r\n  \"unit\": \"celsius\",\r\n  \"timestamp\": \"2026-05-10T08:00:00Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03_Negative",
+      "item": [
+        {
+          "name": "POST /events - Missing Field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Bắt được lỗi 400 (Bad Request) hoặc 422 (Unprocessable Entity)\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"eventType\": \"SENSOR_READING\",\r\n  \"eventId\": \"0196fb3d-4ad7-7d1e-9f49-5d5148d2babc\",\r\n  \"deviceId\": \"SENSOR-001\",\r\n  \"metric\": \"temperature\",\r\n  \"unit\": \"celsius\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04_Boundary_reliability",
+      "item": [
+        {
+          "name": "GET /alerts/recent - Limit Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "pm.test(\"Mảng items trả về không vượt quá 1 (Boundary)\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    if(jsonData.items) {\r",
+                  "        pm.expect(jsonData.items.length).to.be.at.most(1);\r",
+                  "    }\r",
+                  "});\r",
+                  "pm.test(\"Response time dưới 500ms (Reliability)\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alerts/recent?limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alerts",
+                "recent"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05_Consumer_side_Smoke",
+      "item": [
+        {
+          "name": "POST /readings - Call IoT Mock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Smoke Test: Server IoT phản hồi, không bị sập (Not 500)\", function () {\r",
+                  "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"device_id\": \"ESP32-LAB-A01\",\r\n  \"metric\": \"temperature\",\r\n  \"value\": 31.5,\r\n  \"unit\": \"celsius\",\r\n  \"timestamp\": \"2026-05-13T08:30:00+07:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{iotMockUrl}}/readings",
+              "host": [
+                "{{iotMockUrl}}"
+              ],
+              "path": [
+                "readings"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06_Local_only_NonFunctional",
+      "item": [
+        {
+          "name": "GET /health - Local Performance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response time cực mượt, dưới 200ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 ID,Folder,Endpoint,Method,Scenario,Input file/body,Expected status,Expected response check,Type,Pass/Fail,Evidence
-TC01,Functional,/health,GET,Service is alive,-,200,status=ok,functional,,
-TC02,Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, accepted=true",functional,,
-TC03,Negative,/readings,POST,Missing device_id,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details,negative,,
-TC04,Auth,/readings,POST,Missing token,mock-data/sensor-reading-valid.json,401,Problem Details,auth,,
-TC05,Boundary,/readings,POST,High temperature boundary,mock-data/sensor-reading-boundary.json,201/400,documented behavior,boundary,,
+TC01,01_Functional,/health,GET,Health Check,-,200,status=ok,functional,Pass,Newman Report
+TC02,01_Functional,/events,POST,Happy path create event,mock-data,201,"eventId, acceptedAt",functional,Pass,Newman Report
+TC03,02_Auth,/events,POST,Missing token,mock-data,401,Problem Details,auth,Pass,Newman Report
+TC04,03_Negative,/events,POST,Missing required field,mock-data,422/400,Problem Details,negative,Pass,Newman Report
+TC05,04_Boundary_Reliability,/alerts/recent,GET,Limit pagination to 1,limit=1,200,"items length <= 1, time < 500ms",boundary,Pass,Newman Report
+TC06,05_Consumer_side_Smoke,/readings,POST,Call IoT Mock API,mock-data,201/Not 500,-,smoke,Pass,Newman Report
+TC07,06_Local_only_NonFunctional,/health,GET,Local Performance check,-,200,time < 200ms,non-functional,Pass,Newman Report
